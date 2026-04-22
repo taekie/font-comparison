@@ -1,143 +1,194 @@
 (() => {
     'use strict';
 
-    // ===== 상태 =====
+    const FONTS = [
+        { value: 'PyeojinGothic',   label: '펴진고딕' },
+        { value: 'Pretendard',      label: '프리텐다드' },
+        { value: 'WantedSans',      label: 'Wanted Sans' },
+        { value: 'Suit',            label: '수트' },
+        { value: 'MinSans',         label: '민산스' },
+        { value: 'SpoqaHanSansNeo', label: '스포카 한 산스 네오' },
+        { value: 'Noto Sans KR',    label: '노토 산스 KR' },
+    ];
+
+    const COLOR_A_OUTLINE = '1.5px rgba(0,0,0,0.85)';
+    const COLOR_B_FILL    = 'rgba(255,50,50,0.55)';
+    const COLOR_BLACK     = 'rgba(0,0,0,0.88)';
+
+    function fontLabel(family) {
+        return (FONTS.find(f => f.value === family) || { label: family }).label;
+    }
+
     const state = {
         text: '가나다라마바사 아자차카타파하 ABC abc 0123456789',
+        fontA: 'PyeojinGothic',
+        fontB: 'Pretendard',
         weight: 400,
-        fontSize: 72,
-        lineHeight: 1.5,
-        mode: 'overlay',
-        colorA: 'rgba(0,100,255,0.5)',
-        colorB: 'rgba(0,200,100,0.5)',
-        guidelines: false,
+        fontSizeLeft: 200,
+        fontSizeRight: 24,
+        charPairMode: false,
     };
 
-    // 아웃라인 모드 기본 stroke 색
-    const OUTLINE_STROKE = 'rgba(0,0,0,1)';
+    const WEIGHT_NAMES = { 300: 'Light', 400: 'Regular', 500: 'Medium', 700: 'Bold' };
 
-    const WEIGHT_NAMES = { 300: 'Light', 400: 'Regular', 700: 'Bold' };
+    const $text             = document.getElementById('compareText');
+    const $fontSelectA      = document.getElementById('fontSelectA');
+    const $fontSelectB      = document.getElementById('fontSelectB');
+    const $fontSizeLeft     = document.getElementById('fontSizeLeft');
+    const $fontSizeLeftVal  = document.getElementById('fontSizeLeftVal');
+    const $fontSizeRight    = document.getElementById('fontSizeRight');
+    const $fontSizeRightVal = document.getElementById('fontSizeRightVal');
+    const $charPairMode     = document.getElementById('charPairMode');
 
-    // ===== DOM 참조 =====
-    const $text       = document.getElementById('compareText');
-    const $fontSize   = document.getElementById('fontSize');
-    const $fontSizeVal= document.getElementById('fontSizeVal');
-    const $lineHeight = document.getElementById('lineHeight');
-    const $lineHeightVal = document.getElementById('lineHeightVal');
-    const $guidelineToggle = document.getElementById('guidelineToggle');
-    const $guidelinesOverlay = document.getElementById('guidelinesOverlay');
+    const $leftLayerA    = document.getElementById('leftLayerA');
+    const $leftLayerB    = document.getElementById('leftLayerB');
+    const $leftCharPairs = document.getElementById('leftCharPairs');
+    const $rightTextA    = document.getElementById('rightTextA');
+    const $rightTextB    = document.getElementById('rightTextB');
+    const $rightLabelA   = document.getElementById('rightLabelA');
+    const $rightLabelB   = document.getElementById('rightLabelB');
+    const $appSubtitle   = document.getElementById('appSubtitle');
+    const $chipA         = document.getElementById('chipA');
+    const $chipB         = document.getElementById('chipB');
 
-    const $viewport   = document.getElementById('comparisonViewport');
-    const $fontALayer = document.getElementById('fontALayer');
-    const $fontBLayer = document.getElementById('fontBLayer');
-    const $sidePaneA  = document.getElementById('sidePaneA');
-    const $sidePaneB  = document.getElementById('sidePaneB');
-    const $sidePaneTextA = document.getElementById('sidePaneTextA');
-    const $sidePaneTextB = document.getElementById('sidePaneTextB');
+    const $leftViewport  = document.getElementById('leftViewport');
+    const $rightViewport = document.getElementById('rightViewport');
 
-    const $legendLabelA = document.getElementById('legendLabelA');
-    const $legendLabelB = document.getElementById('legendLabelB');
-    const $legendDotA   = document.getElementById('legendDotA');
-    const $legendDotB   = document.getElementById('legendDotB');
-    const $fontATag     = document.getElementById('fontATag');
-    const $fontBTag     = document.getElementById('fontBTag');
-
-    // 모달
-    const $modal        = document.getElementById('charModal');
-    const $modalCharA   = document.getElementById('modalCharA');
-    const $modalCharB   = document.getElementById('modalCharB');
-    const $modalCloseBtn= document.getElementById('modalCloseBtn');
-    const $modalDotA    = document.getElementById('modalDotA');
-    const $modalDotB    = document.getElementById('modalDotB');
-
-    // 패널 토글 (모바일)
-    const $panelToggleBtn = document.getElementById('panelToggleBtn');
-    const $controlPanel   = document.getElementById('controlPanel');
+    const $modal         = document.getElementById('charModal');
+    const $modalCharA    = document.getElementById('modalCharA');
+    const $modalCharB    = document.getElementById('modalCharB');
+    const $modalCloseBtn = document.getElementById('modalCloseBtn');
+    const $modalLabelA   = document.getElementById('modalLabelA');
+    const $modalLabelB   = document.getElementById('modalLabelB');
 
     // ===== 렌더링 =====
 
-    function applyTextStyle(el, fontFamily, color, isOutline) {
-        el.style.fontFamily  = `'${fontFamily}', sans-serif`;
+    function applyLayerStyle(el, family, sz, isOutline) {
+        el.style.fontFamily  = `'${family}', sans-serif`;
         el.style.fontWeight  = state.weight;
-        el.style.fontSize    = `${state.fontSize}px`;
-        el.style.lineHeight  = state.lineHeight;
-
+        el.style.fontSize    = `${sz}px`;
         if (isOutline) {
-            el.style.webkitTextStroke = `1.5px ${OUTLINE_STROKE}`;
+            el.style.webkitTextStroke = COLOR_A_OUTLINE;
             el.style.color = 'transparent';
         } else {
             el.style.webkitTextStroke = '';
-            el.style.color = color;
+            el.style.color = COLOR_B_FILL;
         }
+    }
+
+    function renderLeftOverlay() {
+        const txt = state.text || '';
+        const sz = state.fontSizeLeft;
+
+        $leftLayerA.style.display = '';
+        $leftLayerB.style.display = '';
+        $leftCharPairs.style.display = 'none';
+
+        $leftLayerA.textContent = txt;
+        applyLayerStyle($leftLayerA, state.fontA, sz, true);
+
+        $leftLayerB.textContent = txt;
+        applyLayerStyle($leftLayerB, state.fontB, sz, false);
+    }
+
+    function renderLeftCharPairs() {
+        const txt = state.text || '';
+        const sz = state.fontSizeLeft;
+
+        $leftLayerA.style.display = 'none';
+        $leftLayerB.style.display = 'none';
+        $leftCharPairs.style.display = 'block';
+
+        // DOM으로 안전하게 구성
+        $leftCharPairs.innerHTML = '';
+
+        for (const ch of txt) {
+            if (ch === '\n') {
+                $leftCharPairs.appendChild(document.createElement('br'));
+                continue;
+            }
+
+            if (ch === ' ') {
+                $leftCharPairs.appendChild(document.createTextNode(' '));
+                continue;
+            }
+
+            const pair = document.createElement('span');
+            pair.className = 'char-pair';
+
+            const a = document.createElement('span');
+            a.textContent = ch;
+            a.style.fontFamily = `'${state.fontA}', sans-serif`;
+            a.style.fontWeight = state.weight;
+            a.style.fontSize = `${sz}px`;
+            a.style.webkitTextStroke = COLOR_A_OUTLINE;
+            a.style.color = 'transparent';
+
+            const b = document.createElement('span');
+            b.textContent = ch;
+            b.style.fontFamily = `'${state.fontB}', sans-serif`;
+            b.style.fontWeight = state.weight;
+            b.style.fontSize = `${sz}px`;
+            b.style.color = COLOR_B_FILL;
+
+            pair.appendChild(a);
+            pair.appendChild(b);
+            $leftCharPairs.appendChild(pair);
+        }
+    }
+
+    function renderLeft() {
+        if (state.charPairMode) {
+            renderLeftCharPairs();
+        } else {
+            renderLeftOverlay();
+        }
+    }
+
+    function renderRight() {
+        const txt = state.text || '';
+        const sz = state.fontSizeRight;
+
+        $rightTextA.textContent = txt;
+        $rightTextA.style.fontFamily = `'${state.fontA}', sans-serif`;
+        $rightTextA.style.fontWeight = state.weight;
+        $rightTextA.style.fontSize = `${sz}px`;
+        $rightTextA.style.color = COLOR_BLACK;
+
+        $rightTextB.textContent = txt;
+        $rightTextB.style.fontFamily = `'${state.fontB}', sans-serif`;
+        $rightTextB.style.fontWeight = state.weight;
+        $rightTextB.style.fontSize = `${sz}px`;
+        $rightTextB.style.color = COLOR_BLACK;
+
+        $rightLabelA.textContent = fontLabel(state.fontA);
+        $rightLabelB.textContent = fontLabel(state.fontB);
+    }
+
+    function updateLabels() {
+        const lA = fontLabel(state.fontA);
+        const lB = fontLabel(state.fontB);
+        $appSubtitle.textContent = `${lA} vs ${lB}`;
+        $chipA.textContent = lA;
+        $chipB.textContent = lB;
     }
 
     function render() {
-        const txt = state.text || '';
-        const mode = state.mode;
-
-        // 모드에 따라 viewport 클래스 전환
-        $viewport.classList.remove('overlay-mode', 'side-by-side-mode');
-
-        if (mode === 'overlay' || mode === 'outline') {
-            $viewport.classList.add('overlay-mode');
-
-            // 오버레이/아웃라인: absolute 레이어 표시
-            $fontALayer.style.display = '';
-            $fontBLayer.style.display = '';
-            $sidePaneA.style.display = 'none';
-            $sidePaneB.style.display = 'none';
-
-            $fontALayer.textContent = txt;
-            $fontBLayer.textContent = txt;
-
-            if (mode === 'overlay') {
-                applyTextStyle($fontALayer, 'PyeojinGothic', state.colorA, false);
-                applyTextStyle($fontBLayer, 'Pretendard', state.colorB, false);
-            } else {
-                // 아웃라인 vs 채움
-                applyTextStyle($fontALayer, 'PyeojinGothic', state.colorA, true);
-                applyTextStyle($fontBLayer, 'Pretendard', state.colorB, false);
-            }
-
-            // 뷰어 높이: absolute 레이어가 있으므로 min-height 조정
-            const lineCount = (txt.match(/\n/g) || []).length + 1;
-            const estHeight = lineCount * state.fontSize * state.lineHeight + 80;
-            $viewport.style.minHeight = `${Math.max(300, estHeight)}px`;
-
-        } else if (mode === 'sidebyside') {
-            $viewport.classList.add('side-by-side-mode');
-            $viewport.style.minHeight = '';
-
-            $fontALayer.style.display = 'none';
-            $fontBLayer.style.display = 'none';
-            $sidePaneA.style.display = '';
-            $sidePaneB.style.display = '';
-
-            $sidePaneTextA.textContent = txt;
-            $sidePaneTextB.textContent = txt;
-
-            applyTextStyle($sidePaneTextA, 'PyeojinGothic', state.colorA, false);
-            applyTextStyle($sidePaneTextB, 'Pretendard', state.colorB, false);
-        }
-
-        updateLegend();
-        updateColorIndicators();
+        renderLeft();
+        renderRight();
+        updateLabels();
     }
 
-    function updateLegend() {
-        const wName = WEIGHT_NAMES[state.weight] || state.weight;
-        $legendLabelA.textContent = `PyeojinGothic ${wName}`;
-        $legendLabelB.textContent = `Pretendard ${wName}`;
-        $legendDotA.style.background = state.colorA;
-        $legendDotB.style.background = state.colorB;
-    }
+    // ===== 이벤트 =====
 
-    function updateColorIndicators() {
-        $fontATag.style.background = state.colorA;
-        $fontBTag.style.background = state.colorB;
-    }
+    $fontSelectA.addEventListener('change', () => { state.fontA = $fontSelectA.value; render(); });
+    $fontSelectB.addEventListener('change', () => { state.fontB = $fontSelectB.value; render(); });
+    $text.addEventListener('input', () => { state.text = $text.value; render(); });
 
-    // ===== Weight 버튼 =====
+    $charPairMode.addEventListener('change', () => {
+        state.charPairMode = $charPairMode.checked;
+        renderLeft();
+    });
 
     document.querySelectorAll('.weight-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -148,80 +199,16 @@
         });
     });
 
-    // ===== 텍스트 입력 =====
-
-    $text.addEventListener('input', () => {
-        state.text = $text.value;
-        render();
+    $fontSizeLeft.addEventListener('input', () => {
+        state.fontSizeLeft = Number($fontSizeLeft.value);
+        $fontSizeLeftVal.textContent = `${state.fontSizeLeft}px`;
+        renderLeft();
     });
 
-    // ===== 글자 크기 슬라이더 =====
-
-    $fontSize.addEventListener('input', () => {
-        state.fontSize = Number($fontSize.value);
-        $fontSizeVal.textContent = `${state.fontSize}px`;
-        render();
-    });
-
-    // ===== 줄 간격 슬라이더 =====
-
-    $lineHeight.addEventListener('input', () => {
-        state.lineHeight = Number($lineHeight.value) / 10;
-        $lineHeightVal.textContent = state.lineHeight.toFixed(1);
-        render();
-    });
-
-    // ===== 렌더링 모드 =====
-
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.mode = btn.dataset.mode;
-            render();
-        });
-    });
-
-    // ===== 색상 프리셋 =====
-
-    function setupColorPresets(containerSelector, colorKey, customColorId, customOpacityId) {
-        const container = document.getElementById(containerSelector);
-        const presetBtns = container.querySelectorAll('.color-preset-btn');
-        const $customColor = document.getElementById(customColorId);
-        const $customOpacity = document.getElementById(customOpacityId);
-
-        presetBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                presetBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state[colorKey] = btn.dataset.color;
-                render();
-            });
-        });
-
-        function applyCustomColor() {
-            presetBtns.forEach(b => b.classList.remove('active'));
-            const hex = $customColor.value;
-            const opacity = Number($customOpacity.value) / 100;
-            const r = parseInt(hex.slice(1,3), 16);
-            const g = parseInt(hex.slice(3,5), 16);
-            const b = parseInt(hex.slice(5,7), 16);
-            state[colorKey] = `rgba(${r},${g},${b},${opacity.toFixed(2)})`;
-            render();
-        }
-
-        $customColor.addEventListener('input', applyCustomColor);
-        $customOpacity.addEventListener('input', applyCustomColor);
-    }
-
-    setupColorPresets('colorPresetsA', 'colorA', 'customColorA', 'customOpacityA');
-    setupColorPresets('colorPresetsB', 'colorB', 'customColorB', 'customOpacityB');
-
-    // ===== 가이드라인 토글 =====
-
-    $guidelineToggle.addEventListener('change', () => {
-        state.guidelines = $guidelineToggle.checked;
-        $guidelinesOverlay.style.display = state.guidelines ? '' : 'none';
+    $fontSizeRight.addEventListener('input', () => {
+        state.fontSizeRight = Number($fontSizeRight.value);
+        $fontSizeRightVal.textContent = `${state.fontSizeRight}px`;
+        renderRight();
     });
 
     // ===== 글자 클릭 → 모달 =====
@@ -229,52 +216,31 @@
     function openCharModal(char) {
         if (!char || char.trim() === '') return;
 
-        const wName = WEIGHT_NAMES[state.weight] || state.weight;
-
         $modalCharA.textContent = char;
-        $modalCharB.textContent = char;
-
-        $modalCharA.style.fontFamily = "'PyeojinGothic', sans-serif";
+        $modalCharA.style.fontFamily = `'${state.fontA}', sans-serif`;
         $modalCharA.style.fontWeight = state.weight;
-        $modalCharA.style.color = state.colorA;
-        $modalCharA.style.webkitTextStroke = '';
-        $modalCharA.style.zIndex = '1';
+        $modalCharA.style.webkitTextStroke = COLOR_A_OUTLINE;
+        $modalCharA.style.color = 'transparent';
+        $modalCharA.style.zIndex = '2';
 
-        $modalCharB.style.fontFamily = "'Pretendard', sans-serif";
+        $modalCharB.textContent = char;
+        $modalCharB.style.fontFamily = `'${state.fontB}', sans-serif`;
         $modalCharB.style.fontWeight = state.weight;
-        $modalCharB.style.color = state.colorB;
         $modalCharB.style.webkitTextStroke = '';
-        $modalCharB.style.zIndex = '2';
+        $modalCharB.style.color = COLOR_B_FILL;
+        $modalCharB.style.zIndex = '1';
 
-        $modalDotA.style.background = state.colorA;
-        $modalDotB.style.background = state.colorB;
+        $modalLabelA.textContent = fontLabel(state.fontA);
+        $modalLabelB.textContent = fontLabel(state.fontB);
 
         $modal.classList.add('open');
     }
 
-    function closeModal() {
-        $modal.classList.remove('open');
-    }
+    function closeModal() { $modal.classList.remove('open'); }
 
     $modalCloseBtn.addEventListener('click', closeModal);
-
-    $modal.addEventListener('click', (e) => {
-        if (e.target === $modal) closeModal();
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    // 뷰어 클릭 시 해당 위치의 글자 감지
-    $viewport.addEventListener('click', (e) => {
-        // 모달이나 패널 내부 클릭은 무시
-        if (e.target.closest('.modal-box')) return;
-
-        // 클릭 위치의 텍스트 노드에서 글자 추출
-        const char = getCharAtPoint(e.clientX, e.clientY);
-        if (char) openCharModal(char);
-    });
+    $modal.addEventListener('click', e => { if (e.target === $modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     function getCharAtPoint(x, y) {
         let range;
@@ -288,37 +254,28 @@
                 range.setEnd(pos.offsetNode, pos.offset);
             }
         }
-
         if (!range) return null;
-
         const node = range.startContainer;
         const offset = range.startOffset;
-
         if (node.nodeType === Node.TEXT_NODE) {
             const text = node.textContent;
             const idx = Math.min(offset, text.length - 1);
             const ch = text[idx];
             if (ch && ch !== '\n' && ch !== ' ') return ch;
         }
-
         return null;
     }
 
-    // ===== 모바일 패널 토글 =====
-
-    if ($panelToggleBtn) {
-        $panelToggleBtn.addEventListener('click', () => {
-            $controlPanel.classList.toggle('collapsed');
+    [$leftViewport, $rightViewport].forEach(viewport => {
+        viewport.addEventListener('click', e => {
+            const char = getCharAtPoint(e.clientX, e.clientY);
+            if (char) openCharModal(char);
         });
-    }
+    });
 
     // ===== 초기 렌더링 =====
 
-    document.fonts.ready.then(() => {
-        render();
-    });
-
-    // 폰트 로딩 전에도 일단 렌더링
+    document.fonts.ready.then(() => render());
     render();
 
 })();

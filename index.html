@@ -3,182 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>폰트 비교 — PyeojinGothic vs Pretendard</title>
+    <title>폰트 비교</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- 헤더 -->
 <header class="app-header">
     <h1>폰트 비교</h1>
-    <span class="subtitle">PyeojinGothic vs Pretendard</span>
+    <span class="subtitle" id="appSubtitle">펴진고딕 vs 프리텐다드</span>
 </header>
 
-<!-- 본문 -->
-<div class="app-body">
+<div class="control-panel">
+    <div class="control-group">
+        <label>폰트 A</label>
+        <select class="font-select" id="fontSelectA">
+            <option value="PyeojinGothic" selected>펴진고딕</option>
+            <option value="Pretendard">프리텐다드</option>
+            <option value="WantedSans">Wanted Sans</option>
+            <option value="Suit">수트</option>
+            <option value="MinSans">민산스</option>
+            <option value="SpoqaHanSansNeo">스포카 한 산스 네오</option>
+            <option value="Noto Sans KR">노토 산스 KR</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>폰트 B</label>
+        <select class="font-select" id="fontSelectB">
+            <option value="PyeojinGothic">펴진고딕</option>
+            <option value="Pretendard" selected>프리텐다드</option>
+            <option value="WantedSans">Wanted Sans</option>
+            <option value="Suit">수트</option>
+            <option value="MinSans">민산스</option>
+            <option value="SpoqaHanSansNeo">스포카 한 산스 네오</option>
+            <option value="Noto Sans KR">노토 산스 KR</option>
+        </select>
+    </div>
+    <div class="control-group text-input-group">
+        <label>비교 텍스트</label>
+        <textarea class="text-input" id="compareText" rows="2">가나다라마바사 아자차카타파하 ABC abc 0123456789</textarea>
+    </div>
+    <div class="control-group">
+        <label>굵기</label>
+        <div class="weight-buttons">
+            <button class="weight-btn" data-weight="300">300</button>
+            <button class="weight-btn active" data-weight="400">400</button>
+            <button class="weight-btn" data-weight="500">500</button>
+            <button class="weight-btn" data-weight="700">700</button>
+        </div>
+    </div>
+</div>
 
-    <!-- 컨트롤 패널 -->
-    <div class="control-panel" id="controlPanel">
+<div class="comparison-area">
 
-        <!-- 모바일 토글 버튼 -->
-        <button class="panel-toggle-btn" id="panelToggleBtn">
-            <span>컨트롤 패널</span>
-            <span class="arrow">▲</span>
-        </button>
-
-        <div class="control-panel-inner" id="controlPanelInner">
-
-            <!-- 비교 텍스트 입력 -->
-            <div class="control-group text-input-group">
-                <label for="compareText">비교 텍스트</label>
-                <textarea
-                    class="text-input"
-                    id="compareText"
-                    rows="2"
-                >가나다라마바사 아자차카타파하 ABC abc 0123456789</textarea>
+    <!-- 왼쪽: 아웃라인/채움 비교 -->
+    <div class="comp-pane">
+        <div class="pane-header">
+            <div class="pane-info">
+                <span class="legend-chip outline-chip" id="chipA">펴진고딕</span>
+                <span class="legend-chip fill-chip" id="chipB">프리텐다드</span>
             </div>
-
-            <!-- Font Weight -->
-            <div class="control-group">
-                <label>Font Weight</label>
-                <div class="weight-buttons">
-                    <button class="weight-btn" data-weight="300">300 Light</button>
-                    <button class="weight-btn active" data-weight="400">400 Regular</button>
-                    <button class="weight-btn" data-weight="700">700 Bold</button>
-                </div>
-            </div>
-
-            <!-- 글자 크기 -->
-            <div class="control-group">
-                <label>글자 크기</label>
-                <div class="slider-wrapper">
-                    <input type="range" class="slider slider-size" id="fontSize"
-                        min="24" max="200" value="72">
-                    <span class="slider-val" id="fontSizeVal">72px</span>
-                </div>
-            </div>
-
-            <!-- 줄 간격 -->
-            <div class="control-group">
-                <label>줄 간격</label>
-                <div class="slider-wrapper">
-                    <input type="range" class="slider slider-line" id="lineHeight"
-                        min="10" max="30" value="15" step="1">
-                    <span class="slider-val" id="lineHeightVal">1.5</span>
-                </div>
-            </div>
-
-            <!-- 렌더링 모드 -->
-            <div class="control-group">
-                <label>렌더링 모드</label>
-                <div class="mode-buttons">
-                    <button class="mode-btn active" data-mode="overlay">오버레이</button>
-                    <button class="mode-btn" data-mode="outline">아웃라인/채움</button>
-                    <button class="mode-btn" data-mode="sidebyside">좌우 나란히</button>
-                </div>
-            </div>
-
-            <!-- 폰트 A 색상 -->
-            <div class="control-group">
-                <label>
-                    <span class="font-tag" id="fontATag" style="background: rgba(0,100,255,0.5);"></span>
-                    폰트 A 색상 (PyeojinGothic)
+            <div class="pane-slider-wrap">
+                <label class="pair-toggle">
+                    <input type="checkbox" id="charPairMode">
+                    글자별 비교
                 </label>
-                <div class="color-presets" id="colorPresetsA">
-                    <button class="color-preset-btn" data-color="rgba(0,0,0,1)" style="background: rgba(0,0,0,1);" title="검정"></button>
-                    <button class="color-preset-btn active" data-color="rgba(0,100,255,0.5)" style="background: rgba(0,100,255,0.5);" title="반투명 파랑"></button>
-                    <button class="color-preset-btn" data-color="rgba(0,200,100,0.5)" style="background: rgba(0,200,100,0.5);" title="반투명 초록"></button>
-                    <button class="color-preset-btn" data-color="rgba(255,50,50,0.5)" style="background: rgba(255,50,50,0.5);" title="반투명 빨강"></button>
-                    <button class="color-preset-btn" data-color="rgba(150,50,255,0.5)" style="background: rgba(150,50,255,0.5);" title="반투명 보라"></button>
-                    <div class="custom-color-wrapper">
-                        <input type="color" class="custom-color-input" id="customColorA" value="#0064ff" title="커스텀 색상">
-                        <input type="range" class="opacity-slider" id="customOpacityA" min="0" max="100" value="50" title="투명도">
-                    </div>
-                </div>
-            </div>
-
-            <!-- 폰트 B 색상 -->
-            <div class="control-group">
-                <label>
-                    <span class="font-tag" id="fontBTag" style="background: rgba(0,200,100,0.5);"></span>
-                    폰트 B 색상 (Pretendard)
-                </label>
-                <div class="color-presets" id="colorPresetsB">
-                    <button class="color-preset-btn" data-color="rgba(0,0,0,1)" style="background: rgba(0,0,0,1);" title="검정"></button>
-                    <button class="color-preset-btn" data-color="rgba(0,100,255,0.5)" style="background: rgba(0,100,255,0.5);" title="반투명 파랑"></button>
-                    <button class="color-preset-btn active" data-color="rgba(0,200,100,0.5)" style="background: rgba(0,200,100,0.5);" title="반투명 초록"></button>
-                    <button class="color-preset-btn" data-color="rgba(255,50,50,0.5)" style="background: rgba(255,50,50,0.5);" title="반투명 빨강"></button>
-                    <button class="color-preset-btn" data-color="rgba(150,50,255,0.5)" style="background: rgba(150,50,255,0.5);" title="반투명 보라"></button>
-                    <div class="custom-color-wrapper">
-                        <input type="color" class="custom-color-input" id="customColorB" value="#00c864" title="커스텀 색상">
-                        <input type="range" class="opacity-slider" id="customOpacityB" min="0" max="100" value="50" title="투명도">
-                    </div>
-                </div>
-            </div>
-
-            <!-- 가이드라인 토글 -->
-            <div class="control-group">
-                <label>가이드라인</label>
-                <div class="toggle-wrapper">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="guidelineToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">기준선 표시</span>
-                </div>
-            </div>
-
-        </div><!-- /control-panel-inner -->
-    </div><!-- /control-panel -->
-
-    <!-- 뷰어 -->
-    <div class="viewer-wrapper">
-
-        <!-- 범례 -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-dot" id="legendDotA" style="background: rgba(0,100,255,0.5);"></div>
-                <span id="legendLabelA">PyeojinGothic Regular</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" id="legendDotB" style="background: rgba(0,200,100,0.5);"></div>
-                <span id="legendLabelB">Pretendard Regular</span>
-            </div>
-            <div class="legend-item" style="margin-left: auto; gap: 16px; display: flex;">
-                <span style="font-size:11px; color: rgba(220,80,80,0.8);">— baseline</span>
-                <span style="font-size:11px; color: rgba(60,140,255,0.8);">— x-height</span>
-                <span style="font-size:11px; color: rgba(50,180,90,0.8);">— cap-height</span>
+                <input type="range" class="slider" id="fontSizeLeft" min="10" max="300" value="200">
+                <span class="slider-val" id="fontSizeLeftVal">200px</span>
             </div>
         </div>
+        <div class="pane-viewport overlay-viewport" id="leftViewport">
+            <div class="text-layer" id="leftLayerA"></div>
+            <div class="text-layer" id="leftLayerB"></div>
+            <div class="char-pairs" id="leftCharPairs"></div>
+        </div>
+    </div>
 
-        <!-- 비교 뷰어 -->
-        <div class="comparison-viewport overlay-mode" id="comparisonViewport">
+    <div class="pane-divider"></div>
 
-            <!-- 오버레이 모드 레이어 -->
-            <div class="text-layer font-a" id="fontALayer"></div>
-            <div class="text-layer font-b" id="fontBLayer"></div>
-
-            <!-- 좌우 나란히 모드 -->
-            <div class="side-pane" id="sidePaneA" style="display:none;">
-                <div class="side-pane-label">PyeojinGothic</div>
-                <div class="side-pane-text" id="sidePaneTextA"></div>
+    <!-- 오른쪽: 상하 비교 -->
+    <div class="comp-pane">
+        <div class="pane-header">
+            <div class="pane-info">
+                <span class="pane-title">상하 비교</span>
             </div>
-            <div class="side-pane" id="sidePaneB" style="display:none;">
-                <div class="side-pane-label">Pretendard</div>
-                <div class="side-pane-text" id="sidePaneTextB"></div>
+            <div class="pane-slider-wrap">
+                <input type="range" class="slider" id="fontSizeRight" min="10" max="120" value="24">
+                <span class="slider-val" id="fontSizeRightVal">24px</span>
             </div>
-
-            <!-- 가이드라인 -->
-            <div class="guidelines-overlay" id="guidelinesOverlay" style="display:none;">
-                <div class="guideline cap-height" id="glCapHeight" style="top: 20%;"></div>
-                <div class="guideline xheight" id="glXHeight" style="top: 40%;"></div>
-                <div class="guideline baseline" id="glBaseline" style="top: 70%;"></div>
+        </div>
+        <div class="pane-viewport vertical-viewport" id="rightViewport">
+            <div class="v-block">
+                <div class="v-label" id="rightLabelA">펴진고딕</div>
+                <div class="v-text" id="rightTextA"></div>
             </div>
+            <div class="v-divider"></div>
+            <div class="v-block">
+                <div class="v-label" id="rightLabelB">프리텐다드</div>
+                <div class="v-text" id="rightTextB"></div>
+            </div>
+        </div>
+    </div>
 
-        </div><!-- /comparison-viewport -->
-    </div><!-- /viewer-wrapper -->
-
-</div><!-- /app-body -->
+</div>
 
 <!-- 글자 확대 모달 -->
 <div class="modal-overlay" id="charModal">
@@ -190,12 +116,12 @@
         </div>
         <div class="modal-legend">
             <div class="modal-legend-item">
-                <div class="modal-legend-dot" id="modalDotA"></div>
-                <span>PyeojinGothic</span>
+                <div class="modal-legend-dot outline-dot"></div>
+                <span id="modalLabelA">펴진고딕</span>
             </div>
             <div class="modal-legend-item">
-                <div class="modal-legend-dot" id="modalDotB"></div>
-                <span>Pretendard</span>
+                <div class="modal-legend-dot fill-dot"></div>
+                <span id="modalLabelB">프리텐다드</span>
             </div>
         </div>
         <button class="modal-close" id="modalCloseBtn">닫기</button>
