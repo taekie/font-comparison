@@ -27,6 +27,7 @@
         fontSizeLeft: 200,
         fontSizeRight: 24,
         charPairMode: false,
+        baselineB: 0,
     };
 
     const WEIGHT_NAMES = { 300: 'Light', 400: 'Regular', 500: 'Medium', 700: 'Bold' };
@@ -39,6 +40,8 @@
     const $fontSizeRight    = document.getElementById('fontSizeRight');
     const $fontSizeRightVal = document.getElementById('fontSizeRightVal');
     const $charPairMode     = document.getElementById('charPairMode');
+    const $baselineB        = document.getElementById('baselineB');
+    const $baselineBVal     = document.getElementById('baselineBVal');
 
     const $leftLayerA    = document.getElementById('leftLayerA');
     const $leftLayerB    = document.getElementById('leftLayerB');
@@ -89,6 +92,7 @@
 
         $leftLayerB.textContent = txt;
         applyLayerStyle($leftLayerB, state.fontB, sz, false);
+        $leftLayerB.style.transform = `translateY(${state.baselineB}px)`;
     }
 
     function renderLeftCharPairs() {
@@ -130,6 +134,7 @@
             b.style.fontWeight = state.weight;
             b.style.fontSize = `${sz}px`;
             b.style.color = COLOR_B_FILL;
+            b.style.transform = `translateY(${state.baselineB}px)`;
 
             pair.appendChild(a);
             pair.appendChild(b);
@@ -160,6 +165,7 @@
         $rightTextB.style.fontWeight = state.weight;
         $rightTextB.style.fontSize = `${sz}px`;
         $rightTextB.style.color = COLOR_BLACK;
+        $rightTextB.style.transform = `translateY(${state.baselineB}px)`;
 
         $rightLabelA.textContent = fontLabel(state.fontA);
         $rightLabelB.textContent = fontLabel(state.fontB);
@@ -197,6 +203,12 @@
             state.weight = Number(btn.dataset.weight);
             render();
         });
+    });
+
+    $baselineB.addEventListener('input', () => {
+        state.baselineB = Number($baselineB.value);
+        $baselineBVal.textContent = `${state.baselineB}px`;
+        render();
     });
 
     $fontSizeLeft.addEventListener('input', () => {

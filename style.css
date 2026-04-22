@@ -376,6 +376,18 @@ body {
     cursor: pointer;
 }
 
+.baseline-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.baseline-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
 .slider-val {
     font-size: 11px;
     color: var(--text-secondary);
